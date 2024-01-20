@@ -17,6 +17,7 @@ extern volatile uint64_t fromhost;
 
 static uintptr_t syscall(uintptr_t which, uint64_t arg0, uint64_t arg1, uint64_t arg2)
 {
+#if 0
   volatile uint64_t magic_mem[8] __attribute__((aligned(64)));
   magic_mem[0] = which;
   magic_mem[1] = arg0;
@@ -31,6 +32,9 @@ static uintptr_t syscall(uintptr_t which, uint64_t arg0, uint64_t arg1, uint64_t
 
   __sync_synchronize();
   return magic_mem[0];
+#else
+  return which;
+#endif
 }
 
 #define NUM_COUNTERS 2
@@ -356,18 +360,18 @@ int printf(const char* fmt, ...)
   return 0; // incorrect return value, but who cares, anyway?
 }
 
+static inline void sprintf_putch(int ch, void** data)
+{
+  char** pstr = (char**)data;
+  **pstr = ch;
+  (*pstr)++;
+}
+
 int sprintf(char* str, const char* fmt, ...)
 {
   va_list ap;
   char* str0 = str;
   va_start(ap, fmt);
-
-  void sprintf_putch(int ch, void** data)
-  {
-    char** pstr = (char**)data;
-    **pstr = ch;
-    (*pstr)++;
-  }
 
   vprintfmt(sprintf_putch, (void**)&str, fmt, ap);
   *str = 0;

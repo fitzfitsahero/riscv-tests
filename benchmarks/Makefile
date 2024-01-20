@@ -23,30 +23,35 @@ bmarks = \
 	rsort \
 	towers \
 	vvadd \
-	memcpy \
+#	memcpy \
 	multiply \
-	mm \
+#	mm \
 	dhrystone \
 	spmv \
 	mt-vvadd \
 	mt-matmul \
-	mt-memcpy \
-	pmp \
-	vec-memcpy \
-	vec-daxpy \
-	vec-sgemm \
-	vec-strcmp \
+	#mt-memcpy \
+	#pmp \
+	#vec-memcpy \
+	#vec-daxpy \
+	#vec-sgemm \
+	#vec-strcmp \
 
 #--------------------------------------------------------------------
 # Build rules
 #--------------------------------------------------------------------
 
-RISCV_PREFIX ?= riscv$(XLEN)-unknown-elf-
-RISCV_GCC ?= $(RISCV_PREFIX)gcc
-RISCV_GCC_OPTS ?= -DPREALLOCATE=1 -mcmodel=medany -static -std=gnu99 -O2 -ffast-math -fno-common -fno-builtin-printf -fno-tree-loop-distribute-patterns -march=rv$(XLEN)gcv -mabi=lp64d
+#RISCV_PREFIX ?= riscv$(XLEN)-unknown-elf-
+RISCV_PREFIX ?= /home/fitz/src/hard-tc-utils/cfi_compiler/image/
+#RISCV_GCC ?= $(RISCV_PREFIX)gcc
+RISCV_GCC ?= $(RISCV_PREFIX)bin/clang
+#RISCV_GCC_OPTS ?= -DPREALLOCATE=1 -mcmodel=medany -static -std=gnu99 -O2 -ffast-math -fno-common -fno-builtin-printf -fno-tree-loop-distribute-patterns -march=rv$(XLEN)gcv -mabi=lp64d
+RISCV_GCC_OPTS ?= -DPREALLOCATE=1 -mcmodel=medany -static -std=gnu99 -O0 -ffast-math -fno-common -fno-builtin-printf -fno-stack-protector -U_FORTIFY_SOURCE -mno-relax -nostartfiles -march=rv64g -mabi=lp64d --sysroot=$(RISCV_PREFIX) -fno-pic
 RISCV_LINK ?= $(RISCV_GCC) -T $(src_dir)/common/test.ld $(incs)
-RISCV_LINK_OPTS ?= -static -nostdlib -nostartfiles -lm -lgcc -T $(src_dir)/common/test.ld
-RISCV_OBJDUMP ?= $(RISCV_PREFIX)objdump --disassemble-all --disassemble-zeroes --section=.text --section=.text.startup --section=.text.init --section=.data
+#RISCV_LINK_OPTS ?= -static -nostdlib -nostartfiles -lm -lgcc -T $(src_dir)/common/test.ld
+RISCV_LINK_OPTS ?= -Xlinker -static -Xlinker -nostdlib -Xlinker -lm -Xlinker -T $(src_dir)/common/test.ld
+#RISCV_OBJDUMP ?= $(RISCV_PREFIX)objdump --disassemble-all --disassemble-zeroes --section=.text --section=.text.startup --section=.text.init --section=.data
+RISCV_OBJDUMP ?= $(RISCV_PREFIX)bin/llvm-objdump --disassemble-all --disassemble-zeroes --section=.text --section=.text.startup --section=.text.init --section=.data
 RISCV_SIM ?= spike --isa=rv$(XLEN)gcv
 
 incs  += -I$(src_dir)/../env -I$(src_dir)/common $(addprefix -I$(src_dir)/, $(bmarks))
