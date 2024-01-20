@@ -107,41 +107,13 @@ RVTEST_CODE_BEGIN
 2:
 
 #ifdef __MACHINE_MODE
-  # Skip if C cannot be enabled
-  csrsi misa, 1 << ('c' - 'a')
-  csrr t2, misa
-  andi t2, t2, 1 << ('c' - 'a')
-  beqz t2, pass
-
-  # Skip if C cannot be disabled
-  csrci misa, 1 << ('c' - 'a')
-  csrr t2, misa
-  andi t2, t2, 1 << ('c' - 'a')
-  bnez t2, pass
-
-  # Skip if clearing misa.C does not set IALIGN=32
-  csrr t0, mtvec
-  la t1, 1f
-  addi t1, t1, 2
-  csrw mtvec, t1
-  j 1f
-
-  .option rvc
-  c.nop
-1:
-  j pass
-  .option norvc
-2:
-  csrw mtvec, t0
-  csrsi misa, 1 << ('c' - 'a')
-
-  # IALIGN=32 cannot be set if doing so would cause a misaligned instruction
+  # RVC cannot be disabled if doing so would cause a misaligned instruction
   # exception on the next instruction fetch. (This test assumes no other
   # extensions that support misalignment are present.)
   li TESTNUM, 8
   csrr t2, misa
   andi t2, t2, 1 << ('c' - 'a')
-  beqz t2, pass
+  beqz t2, 2f
 
   .option rvc
   c.nop
@@ -154,13 +126,18 @@ RVTEST_CODE_BEGIN
   andi t2, t2, 1 << ('c' - 'a')
   beqz t2, fail
 
-  # IALIGN=32, mret to a misaligned mepc should succeed,
+  # When RVC is disabled, mret to a misaligned mepc should succeed,
   # masking off mepc[1].
   la t0, 1f
   addi t0, t0, -2
   csrw mepc, t0
 
+  # Try to disable RVC; if it can't be disabled, skip the test.
   csrci misa, 1 << ('c' - 'a')
+  csrr t2, misa
+  andi t2, t2, 1 << ('c' - 'a')
+  bnez t2, 2f
+
   li t2, MSTATUS_MPP
   csrs mstatus, t2
   mret
@@ -171,6 +148,7 @@ RVTEST_CODE_BEGIN
   beqz x0, 1f
 1:
   csrsi misa, 1 << ('c' - 'a')
+2:
 #endif
 
   j pass
@@ -206,13 +184,13 @@ stvec_handler:
   bne t0, a1, fail
 
   # verify that badaddr == 0 or badaddr == t0+2.
-  csrr a0, sbadaddr
+  csrr a0, satp
   beqz a0, 1f
   addi a0, a0, -2
   bne a0, t0, fail
 1:
 
-  addi a1, a1, 8
+  addi a1, a1, 12
   csrw sepc, a1
   sret
 

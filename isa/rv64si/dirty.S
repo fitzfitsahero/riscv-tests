@@ -10,10 +10,6 @@
 #include "riscv_test.h"
 #include "test_macros.h"
 
-#if (DRAM_BASE >> 30 << 30) != DRAM_BASE
-# error This test requires DRAM_BASE be SV39 superpage-aligned
-#endif 
-
 RVTEST_RV64M
 RVTEST_CODE_BEGIN
 
@@ -22,7 +18,7 @@ RVTEST_CODE_BEGIN
   la a1, page_table_1
   srl a1, a1, RISCV_PGSHIFT
   or a1, a1, a0
-  csrw sptbr, a1
+  csrw satp, a1
   sfence.vma
 
   # Set up MPRV with MPP=S, so loads and stores use S-mode

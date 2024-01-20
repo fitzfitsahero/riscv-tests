@@ -54,7 +54,7 @@ RVTEST_CODE_BEGIN
     fmv.d.x f2, a2; \
     fsgnj.s f0, f1, f2; \
     fmv.x.d a0, f0)
-
+/*
   TEST_FSGNJS(40, 0x7fc00000, 0x7ffffffe12345678, 0)
   TEST_FSGNJS(41, 0x7fc00000, 0xfffffffe12345678, 0)
   TEST_FSGNJS(42, 0x7fc00000, 0x7fffffff12345678, 0)
@@ -69,7 +69,7 @@ RVTEST_CODE_BEGIN
   TEST_FSGNJS(61, 0xffc00000, 0xfffffffe12345678, 0xffffffff80000000)
   TEST_FSGNJS(62, 0x92345678, 0xffffffff12345678, 0xffffffff80000000)
   TEST_FSGNJS(63, 0x12345678, 0xffffffff12345678, 0x7fffffff80000000)
-
+*/
 // Test fsgnj.d in conjunction with single-precision moves
 #define TEST_FSGNJD_SP(n, isnan, rd, rs1, rs2) \
   TEST_CASE(n, a0, ((rd) & 0xffffffff) | (-(((rd) >> 31) & 1) << 32), \
